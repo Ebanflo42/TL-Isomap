@@ -23,7 +23,7 @@ def build_nbrhd_graph(arr_2d, d):
 
     return result
 
-def floyd_warshall(graph, v):
+def floyd_warshall(graph):
     """
     :param graph: weighted graph
     :type graph: networkx.Graph with weight attribute on each edge
@@ -32,19 +32,22 @@ def floyd_warshall(graph, v):
     :return: shortest distance between all vertex pairs as 2D numpy array
     """
 
-    dist = np.array([np.array([float("inf") for _ in range(v)]) for _ in range(v)])
+    num_verts = len(list(graph.nodes))
+
+    dist = np.array([np.array([float("inf") for _ in range(num_verts)]) for _ in range(num_verts)])
 
     for n in list(graph.nodes):
         n_edges = nx.edges(graph, n)
         for (i, j) in n_edges:
             dist[i][j] = graph[i][j]['weight']
+            dist[j][i] = graph[i][j]['weight']
 
     # check vertex k against all other vertices (i, j)
-    for k in range(v):
+    for k in range(num_verts):
         # looping through rows of graph array
-        for i in range(v):
+        for i in range(num_verts):
             # looping through columns of graph array
-            for j in range(v):
+            for j in range(num_verts):
                 if dist[i][k] + dist[k][j] < dist[i][j]:
                     dist[i][j] = dist[i][k] + dist[k][j]
 

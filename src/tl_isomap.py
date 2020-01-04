@@ -167,6 +167,8 @@ class TLIsomap:
 
         num_datum = len(self.data)
         num_landmarks = len(self.graph.nodes)
+        if num_landmarks == 0:
+            ValueError('tl_isomap.py: No landmarks!')
         total = num_datum + num_landmarks
         augmented_data = self.data
         for node in list(self.graph.nodes):
@@ -177,7 +179,7 @@ class TLIsomap:
             dist = la.norm(self.centroids[i] - self.centroids[j])
             nbhrd_graph.add_edge(num_datum + i, num_datum + j, weight = dist*dist)
 
-        dist_mat = iso.floyd_warshall(nbhrd_graph, total)
+        dist_mat = iso.floyd_warshall(nbhrd_graph)
         sub_mat = dist_mat[total - num_landmarks - 1 : total - 1]
 
         embedding = iso.lmds(k, sub_mat)

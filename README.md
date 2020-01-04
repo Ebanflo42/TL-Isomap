@@ -20,13 +20,13 @@ import tl_isomap
 $ cd TL-Isomap
 $ python
 >>> import sys
->>> sys.path.append('/path/to/TL-Isomap/src')
+>>> sys.path.append('src')
 >>> import numpy as np
 >>> import clustering as cl
 >>> import filter_functions as ff
 >>> import tl_isomap as tli
 >>> data = np.load('test_data/spirals.npy')
->>> my_tli = tli.TLIsomap(data, ff.eccentricity_p(data, 2.0), cl.DBSCAN)
+>>> my_tli = tli.TLIsomap(data, ff.eccentricity_p(data, 2.0), cl.DBSCAN, num_bins = 10, dbscan_eps = 0.5, num_neighbors = 4, isomap_eps = 0.1)
 >>> my_tli.run_mapper()
 >>> my_tli.graph.edges
  . . .
