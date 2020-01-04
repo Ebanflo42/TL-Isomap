@@ -14,7 +14,7 @@ sys.path.append('/path/to/TL-Isomap/src')
 import tl_isomap
 ```
 
-# Example
+## Example
 
 ```
 $ cd TL-Isomap
