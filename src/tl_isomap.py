@@ -1,30 +1,57 @@
 import networkx as nx
 import pandas as pd
 import numpy as np
+import numpy.linalg as la
 import types
 
 import clustering as cl
-import isomap_utils as iu
+import isomap_utils as iso
+
+"""
+This module implements Topological L-isomap and (by necessity) the mapper algorithm.
+
+The TLIsomap constructor has the following fields
+data: the data to be analyzed as a 2D numpy array
+filter_function: function taking an index into the data set and returning a real number
+Clustering: A clustering class, see clustering.py
+overlap: percent overlap between the intervals used for mapper
+num_bins: number of intervals to cut the image of the filter function into
+max_slc_clusters: maximum number of clusters that SLC may identify
+dbscan_eps: how close must two points be for DBSCAN to consider them neighbors
+num_neighbors: how many neighbors must a point have for DBSCAN to consider it a core point
+isomap_eps: how close must two points be for them to have an edge in the neighborhood graph
+
+Once a TLIsomap object is initialized, run_mapper() will exectute the mapper algorithm.
+The graph attribute contains the resulting Reeb graph as a networkx graph,
+and the centroids attribute contains the centroids of each cluster as
+a dictionary whose keys are the nodes of the graph.
+
+embed_k_dims(k) will return the data embedded the data into k dimensions using Topological L-isomap.
+None of the helper variables for this algorithm are stored as fields in the class.
+If run_mapper() has not been executed, this function will execute it first,
+but not re-execute it unnecessarily.
+"""
 
 class TLIsomap:
 
-    #note that max_clusters does not apply to DBSCAN, and eps and num_neighbors only apply to DBSCAN
     def __init__(self,
                  data,
                  filter_function,
                  Clustering,
                  overlap = 50,
                  num_bins = 20,
-                 max_clusters = 10,
-                 eps = 0.5,
-                 num_neighbors = 10):
+                 max_slc_clusters = 10,
+                 dbscan_eps = 0.5,
+                 num_neighbors = 10,
+                 isomap_eps = 0.5):
 
         self.overlap = overlap
         self.num_bins = num_bins
 
-        self.max_clusters = max_clusters
-        self.eps = eps
+        self.max_slc_clusters = max_slc_clusters
+        self.dbscan_eps = dbscan_eps
         self.num_neighbors = num_neighbors
+        self.isomap_eps = isomap_eps
 
         self.data = data
         self.indices = np.arange(len(data))
@@ -88,8 +115,8 @@ class TLIsomap:
             local_to_global = dict(zip(list(range(len(self.data))), keys))
 
             cluster_obj = self.cluster_class(self.data[keys],
-                                             self.max_clusters,
-                                             self.eps,
+                                             self.max_slc_clusters,
+                                             self.dbscan_eps,
                                              self.num_neighbors)
 
             cluster_to_ind = cluster_obj.run_clustering()
@@ -122,7 +149,7 @@ class TLIsomap:
         c_to_centroid = {}
         for _, clusters in self.clusters.items():
             for node, indices in clusters.items():
-                c_to_centroid[node] = np.mean(self.data[indices], axis=0)
+                c_to_centroid[node] = np.mean(self.data[indices], axis = 0)
 
         self.centroids = c_to_centroid
 
@@ -131,14 +158,28 @@ class TLIsomap:
         self._apply_filter_function()
         self._apply_clustering()
         self._build_graph()
+        self._get_centroids()
 
     def embed_k_dims(self, k):
 
         if self.graph == None:
             self.run_mapper()
 
-        self._get_centroids()
+        num_datum = len(self.data)
+        num_landmarks = len(self.graph.nodes)
+        total = num_datum + num_landmarks
+        augmented_data = self.data
+        for node in list(self.graph.nodes):
+            augmented_data = np.append(augmented_data, self.centroids[node])
 
-        augmented_data = np.append(self.data, self.centroids)
+        nbhrd_graph = iso.build_nbrhd_graph(augmented_data, self.isomap_eps)
+        for i, j in list(self.graph.edges):
+            dist = la.norm(self.centroids[i] - self.centroids[j])
+            nbhrd_graph.add_edge(num_datum + i, num_datum + j, weight = dist*dist)
 
-        nbrhd_graph = nx.Graph()
+        dist_mat = iso.floyd_warshall(nbhrd_graph, total)
+        sub_mat = dist_mat[total - num_landmarks - 1 : total - 1]
+
+        embedding = iso.lmds(k, sub_mat)
+
+        return embedding

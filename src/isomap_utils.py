@@ -2,7 +2,7 @@ import numpy as np
 import numpy.linalg as la
 import networkx as nx
 
-def nbrhd_graph(arr_2d, d):
+def build_nbrhd_graph(arr_2d, d):
     """
     :param arr_2d: point cloud in Euclidean space
     :type arr_2d: 2D numpy array
@@ -11,7 +11,7 @@ def nbrhd_graph(arr_2d, d):
     :return: networkx graph of neighbors within d distance; labeled with squared distances
     """
 
-    result = nx.graph()
+    result = nx.Graph()
     num_points = len(arr_2d)
 
     for i in range(0, num_points - 1):
@@ -19,7 +19,7 @@ def nbrhd_graph(arr_2d, d):
             dist = la.norm(arr_2d[i] - arr_2d[j])
             if dist < d:
                 dist *= dist
-                result.add_edge(i, j, weight=dist)
+                result.add_edge(i, j, weight = dist)
 
     return result
 
@@ -36,8 +36,8 @@ def floyd_warshall(graph, v):
 
     for n in list(graph.nodes):
         n_edges = nx.edges(graph, n)
-        for (i, j) in n_edges.data('weight'):
-            dist[i][j] = graph[i][j].weight
+        for (i, j) in n_edges:
+            dist[i][j] = graph[i][j]['weight']
 
     # check vertex k against all other vertices (i, j)
     for k in range(v):
@@ -82,6 +82,7 @@ def lmds(k, sqr_dist_mat):
     :type k: int
     :param sqr_dist_mat: matrix of squared distances between landmark nodes and all other nodes
     :type sqr_dist_mat: 2D numpy array
+    :return: embedding of the original data in k dimensions as 2D numpy array
     """
 
     num_landmarks = len(sqr_dist_mat)

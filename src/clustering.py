@@ -4,7 +4,10 @@ import pandas as pd
 import numpy as np
 import abc
 
-
+"""
+Although different clustering algorithms require different parameters,
+each clustering class must implement an abstract class as a means to ensure type safety.
+"""
 
 #Abstract Clustering class to be implemented for Mapper
 class ClusteringTDA(abc.ABC):
