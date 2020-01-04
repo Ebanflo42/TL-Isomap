@@ -4,6 +4,7 @@ import numpy as np
 import types
 
 import clustering as cl
+import isomap_utils as iu
 
 class TLIsomap:
 
@@ -133,4 +134,11 @@ class TLIsomap:
 
     def embed_k_dims(self, k):
 
+        if self.graph == None:
+            self.run_mapper()
+
         self._get_centroids()
+
+        augmented_data = np.append(self.data, self.centroids)
+
+        nbrhd_graph = nx.Graph()

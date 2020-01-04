@@ -7,3 +7,6 @@
 .idea
 
 __pycache__
+
+#hidden local directory with large file
+gru
