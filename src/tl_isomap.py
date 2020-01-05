@@ -179,7 +179,7 @@ class TLIsomap:
             dist = la.norm(self.centroids[i] - self.centroids[j])
             nbhrd_graph.add_edge(num_datum + i, num_datum + j, weight = dist*dist)
 
-        dist_mat = iso.floyd_warshall(nbhrd_graph)
+        dist_mat = iso.floyd_warshall(nbhrd_graph, range(num_datum, total))
         sub_mat = dist_mat[total - num_landmarks - 1 : total - 1]
 
         embedding = iso.lmds(k, sub_mat)
