@@ -65,11 +65,14 @@ def mds(k, sqr_dist_mat):
     """
 
     if len(sqr_dist_mat) != len(sqr_dist_mat[0]):
-        ValueError('distance matrix not square')
+        ValueError('isomap_utils.mds: distance matrix not square')
+
     n = len(sqr_dist_mat)
     centerer = (1.0/n)*np.ones((n, n))
+    print(sqr_dist_mat.shape)
+    print(centerer.shape)
     centered_mat = -0.5*np.matmul(centerer, np.matmul(sqr_dist_mat, centerer))
-    values, vectors = la.eigh(centered_mat)
+    values, vectors = la.eig(centered_mat)
 
     #k may have to be reduced if the intrinsic dimension of the data is lower
     for i in range(0, n - 1):
@@ -92,7 +95,7 @@ def lmds(k, sqr_dist_mat):
 
     num_landmarks = len(sqr_dist_mat)
     num_points = len(sqr_dist_mat[0])
-    sub_mat = sqr_dist_mat[:, 0 : num_landmarks - 1]
+    sub_mat = sqr_dist_mat[:, 0 : num_landmarks]
     evalues, landmark_embedding = mds(k, sub_mat)
 
     pseudo_embedding = np.matmul(landmark_embedding, np.diag(np.reciprocal(evalues)))

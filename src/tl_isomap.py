@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import numpy.linalg as la
 import types
+import warnings
 
 import clustering as cl
 import isomap_utils as iso
@@ -38,12 +39,12 @@ class TLIsomap:
                  data,
                  filter_function,
                  Clustering,
-                 overlap = 50,
-                 num_bins = 20,
-                 max_slc_clusters = 10,
-                 dbscan_eps = 0.5,
-                 num_neighbors = 10,
-                 isomap_eps = 0.5):
+                 overlap=50,
+                 num_bins=20,
+                 max_slc_clusters=10,
+                 dbscan_eps=0.5,
+                 num_neighbors=10,
+                 isomap_eps=0.5):
 
         self.overlap = overlap
         self.num_bins = num_bins
@@ -178,6 +179,9 @@ class TLIsomap:
         for i, j in list(self.graph.edges):
             dist = la.norm(self.centroids[i] - self.centroids[j])
             nbhrd_graph.add_edge(num_datum + i, num_datum + j, weight = dist*dist)
+
+        if not nx.is_connected(nbhrd_graph):
+            warnings.warn('The neighborhood grpha is disconnected; TL-Isomap will embed only one of the components.', RuntimeWarning)
 
         dist_mat = iso.floyd_warshall(nbhrd_graph, range(num_datum, total))
         sub_mat = dist_mat[total - num_landmarks - 1 : total - 1]
