@@ -1,6 +1,10 @@
 # TL-Isomap
 
-A Python library implementing the Topological Landmark-Isomap algorithm presented in "Homology-Preserving Dimensionality Reduction via Manifold Landmarking and Tearing" by Yan et al.
+A Python library implementing the Topological Landmark-Isomap algorithm presented in
+
+```
+Yan, Lin & Yaodong Zhao, Paul Rosen, Carlos Scheidegger & Bei Wang. (2018). Homology-Preserving Dimensionality Reduction via Manifold Landmarking and Tearing.
+```
 
 ## Getting Started
 
