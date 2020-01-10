@@ -170,7 +170,7 @@ class TLIsomap:
         num_landmarks = len(self.graph.nodes)
         if num_landmarks == 0:
             ValueError('tl_isomap.py: No landmarks!')
-        total = num_datum + num_landmarks
+        num_points = num_datum + num_landmarks
         augmented_data = self.data
         for node in list(self.graph.nodes):
             augmented_data = np.append(augmented_data, self.centroids[node])
@@ -183,8 +183,8 @@ class TLIsomap:
         if not nx.is_connected(nbhrd_graph):
             warnings.warn('The neighborhood grpha is disconnected; TL-Isomap will embed only one of the components.', RuntimeWarning)
 
-        dist_mat = iso.floyd_warshall(nbhrd_graph, range(num_datum, total))
-        sub_mat = dist_mat[total - num_landmarks - 1 : total - 1]
+        dist_mat = iso.floyd_warshall(nbhrd_graph)
+        sub_mat = dist_mat[num_points - num_landmarks : num_points]
 
         embedding = iso.lmds(k, sub_mat)
 

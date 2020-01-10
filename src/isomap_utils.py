@@ -23,7 +23,7 @@ def build_nbrhd_graph(arr_2d, d):
 
     return result
 
-def floyd_warshall(graph, lm_verts):
+def floyd_warshall(graph):
     """
     :param graph: weighted graph
     :type graph: networkx.Graph with weight attribute on each edge
@@ -31,7 +31,7 @@ def floyd_warshall(graph, lm_verts):
     :type lm_verts: list of indices into the nodes of the graph
     :param v: number of vertices
     :type v: int
-    :return: shortest distance from any point to any landmark point as 2D numpy array
+    :return: shortest distance from any point to any other point as 2D numpy array
     """
 
     num_verts = len(list(graph.nodes))
@@ -49,9 +49,10 @@ def floyd_warshall(graph, lm_verts):
         # looping through rows of graph array
         for i in range(num_verts):
             # looping through columns of graph array
-            for j in lm_verts:
+            for j in range(num_verts):
                 if dist[i][k] + dist[k][j] < dist[i][j]:
                     dist[i][j] = dist[i][k] + dist[k][j]
+                    dist[j][i] = dist[i][k] + dist[k][j]
 
     return dist
 
@@ -69,19 +70,19 @@ def mds(k, sqr_dist_mat):
 
     n = len(sqr_dist_mat)
     centerer = (1.0/n)*np.ones((n, n))
-    print(sqr_dist_mat.shape)
-    print(centerer.shape)
     centered_mat = -0.5*np.matmul(centerer, np.matmul(sqr_dist_mat, centerer))
-    values, vectors = la.eig(centered_mat)
+    values, vectors = la.eigh(centered_mat)
 
     #k may have to be reduced if the intrinsic dimension of the data is lower
-    for i in range(0, n - 1):
+    m = 0
+    for i in range(n):
         if values[i] <= 0:
-            k -= 1
+            m += 1
+    if m < k: k = m
 
-    important_values = values[n - k - 1 : n - 1]
-    important_vectors = vectors[n - k - 1 : n - 1]
-    embedding_matrix = np.matmul(important_vectors, np.diag(np.sqrt(important_values)))
+    important_values = values[n - k : n]
+    important_vectors = vectors[n - k : n]
+    embedding_matrix = np.diag(np.sqrt(important_values)) @ important_vectors
     return important_values, embedding_matrix
 
 def lmds(k, sqr_dist_mat):
@@ -95,13 +96,13 @@ def lmds(k, sqr_dist_mat):
 
     num_landmarks = len(sqr_dist_mat)
     num_points = len(sqr_dist_mat[0])
-    sub_mat = sqr_dist_mat[:, 0 : num_landmarks]
+    sub_mat = sqr_dist_mat[:, num_points - num_landmarks : num_points]
     evalues, landmark_embedding = mds(k, sub_mat)
 
-    pseudo_embedding = np.matmul(landmark_embedding, np.diag(np.reciprocal(evalues)))
+    pseudo_embedding = np.diag(np.reciprocal(evalues)) @ landmark_embedding
     sum_sq_dist = np.sum(sqr_dist_mat[:, 0 : num_landmarks - 1])
     mean_sq_dist = np.transpose(np.multiply(1.0/num_landmarks, sum_sq_dist))
-    rest_of_dist = sqr_dist_mat[:, num_landmarks : num_points - 1]
+    rest_of_dist = sqr_dist_mat[:, num_landmarks : num_points]
 
     for i in range(0, len(rest_of_dist - 1)):
         helper = rest_of_dist[:, i]
