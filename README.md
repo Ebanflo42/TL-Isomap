@@ -37,6 +37,4 @@ $ python
 
 ## Further Information
 
-The library offers the use of DBSCAN or SLC for clustering; different parameters must be passed to the constructor of the `Mapper` object depending on which clustering algorithm is to be used.
-
-In the future, manifold tearing ought to be added to the library.
+The library offers the use of DBSCAN or SLC for clustering; different parameters must be passed to the constructor of the `TLIsomap` object depending on which clustering algorithm is to be used.
