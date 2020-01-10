@@ -1,12 +1,9 @@
-# Ignore pyc files
 *.pyc
-
-# Ignore .DS_Store
-*.DS_Store
-
 .idea
-
 __pycache__
 
 #hidden local directory with large file
 gru
+
+#testing on data
+test_script.py

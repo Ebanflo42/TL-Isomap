@@ -63,6 +63,6 @@ def arc_len(data, traj_len):
         for i in range(num_trajs - 1):
             arc_len_arr[i][0] = 0
             for j in range(traj_len - 1):
-                arc_len_arr[i][j + 1] = arc_len_arr[i][j] + cdist([data[traj_len*i + j]], [data[traj_len*i + j + 1]], metric="euclidean")[0][0] #there's got to be a better way...
+                arc_len_arr[i][j + 1] = arc_len_arr[i][j] + cdist([data[traj_len*i + j]], [data[traj_len*i + j + 1]], metric='euclidean')[0][0] #there's got to be a better way...
 
         return (lambda i: arc_len_arr[i//traj_len][i%traj_len])

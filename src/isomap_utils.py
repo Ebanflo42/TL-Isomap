@@ -23,7 +23,7 @@ def build_nbrhd_graph(arr_2d, d):
 
     return result
 
-def floyd_warshall(graph):
+def floyd_warshall(graph, lm_verts):
     """
     :param graph: weighted graph
     :type graph: networkx.Graph with weight attribute on each edge
@@ -31,7 +31,7 @@ def floyd_warshall(graph):
     :type lm_verts: list of indices into the nodes of the graph
     :param v: number of vertices
     :type v: int
-    :return: shortest distance from any point to any other point as 2D numpy array
+    :return: shortest distance from any point to any landmark point as 2D numpy array
     """
 
     num_verts = len(list(graph.nodes))
@@ -44,11 +44,8 @@ def floyd_warshall(graph):
             dist[i][j] = graph[i][j]['weight']
             dist[j][i] = graph[i][j]['weight']
 
-    # check vertex k against all other vertices (i, j)
-    for k in range(num_verts):
-        # looping through rows of graph array
+    for k in lm_verts:
         for i in range(num_verts):
-            # looping through columns of graph array
             for j in range(num_verts):
                 if dist[i][k] + dist[k][j] < dist[i][j]:
                     dist[i][j] = dist[i][k] + dist[k][j]
@@ -108,6 +105,6 @@ def lmds(k, sqr_dist_mat):
         helper = rest_of_dist[:, i]
         rest_of_dist[:, i] = helper - mean_sq_dist
 
-    rest_of_embedding = -0.5*np.matmul(pseudo_embedding, rest_of_dist)
+    rest_of_embedding = np.transpose(pseudo_embedding @ rest_of_dist)
 
     return rest_of_embedding

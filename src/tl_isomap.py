@@ -150,7 +150,7 @@ class TLIsomap:
         c_to_centroid = {}
         for _, clusters in self.clusters.items():
             for node, indices in clusters.items():
-                c_to_centroid[node] = np.mean(self.data[indices], axis = 0)
+                c_to_centroid[node] = np.mean(self.data[indices], axis=0)
 
         self.centroids = c_to_centroid
 
@@ -178,14 +178,13 @@ class TLIsomap:
         nbhrd_graph = iso.build_nbrhd_graph(augmented_data, self.isomap_eps)
         for i, j in list(self.graph.edges):
             dist = la.norm(self.centroids[i] - self.centroids[j])
-            nbhrd_graph.add_edge(num_datum + i, num_datum + j, weight = dist*dist)
+            nbhrd_graph.add_edge(num_datum + i, num_datum + j, weight=dist*dist)
 
         if not nx.is_connected(nbhrd_graph):
             warnings.warn('The neighborhood grpha is disconnected; TL-Isomap will embed only one of the components.', RuntimeWarning)
 
-        dist_mat = iso.floyd_warshall(nbhrd_graph)
+        dist_mat = iso.floyd_warshall(nbhrd_graph, range(num_datum, num_points))
         sub_mat = dist_mat[num_points - num_landmarks : num_points]
-
         embedding = iso.lmds(k, sub_mat)
 
         return embedding
